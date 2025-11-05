@@ -11,4 +11,3 @@ __pycache__/
 *.vcd
 src/user_config.json
 src/config_merged.json
-tt/
