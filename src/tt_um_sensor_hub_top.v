@@ -42,14 +42,14 @@ module tt_um_sensor_hub_top(
         else req_tx <= 1'b0;
     end
 
-    wire uart_tx;
+    wire uart_tx_line;
     uart_tx #(.DIV(434)) u_tx(
         .clk(clk), .rst_n(rst_n),
         .start(req_tx), .data(adc_data),
-        .tx(uart_tx), .busy(uart_busy)
+        .tx(uart_tx_line), .busy(uart_busy)
     );
 
-    assign uo_out[0]   = uart_tx;
+    assign uo_out[0]   = uart_tx_line;
     assign uo_out[7:1] = 7'b0;
 endmodule
 `default_nettype wire
