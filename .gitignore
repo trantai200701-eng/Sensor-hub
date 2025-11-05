@@ -3,3 +3,11 @@ build/
 .tt_tools/
 __pycache__/
 *.log
+.venv/
+venv/
+build/
+.tt_tools/
+__pycache__/
+*.vcd
+src/user_config.json
+src/config_merged.json
