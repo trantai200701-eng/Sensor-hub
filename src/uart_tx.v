@@ -1,6 +1,8 @@
 `default_nettype none
 module uart_tx #(
-    parameter integer DIV = 434  // 50 MHz / 115200 ≈ 434
+-    parameter integer DIV = 434  // 50 MHz / 115200 ≈ 434
++    // 16-bit để khớp với bộ đếm cnt và tránh WIDTHTRUNC
++    parameter [15:0] DIV = 16'd434  // 50 MHz / 115200 ≈ 434
 )(
     input  wire       clk,
     input  wire       rst_n,
@@ -21,13 +23,15 @@ module uart_tx #(
             if (!busy) begin
                 if (start) begin
                     sh <= {1'b1, data, 1'b0};  // LSB first
-                    busy <= 1'b1; bitpos <= 4'd0; cnt <= DIV-1;
+-                    busy <= 1'b1; bitpos <= 4'd0; cnt <= DIV - 16'd1;
++                    busy <= 1'b1; bitpos <= 4'd0; cnt <= DIV - 16'd1;
                 end
             end else begin
                 if (cnt == 0) begin
                     tx <= sh[0];
                     sh <= {1'b1, sh[9:1]};
-                    cnt <= DIV - 1;
+-                    cnt <= DIV - 1;
++                    cnt <= DIV - 16'd1;
                     bitpos <= bitpos + 1'b1;
                     if (bitpos == 4'd9) begin
                         busy <= 1'b0;
@@ -41,3 +45,4 @@ module uart_tx #(
     end
 endmodule
 `default_nettype wire
+
