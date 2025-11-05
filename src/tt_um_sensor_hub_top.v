@@ -9,11 +9,10 @@ module tt_um_sensor_hub_top(
     output wire [7:0]  uio_out,
     output wire [7:0]  uio_oe
 );
-    // Chưa dùng UIO → High-Z
     assign uio_out = 8'h00;
     assign uio_oe  = 8'h00;
 
-    // Tạo tick ~1 kHz từ 50 MHz
+    // tạo tick ~1 kHz từ 50 MHz
     localparam integer SAMPLE_DIV = 50000;
     reg [$clog2(SAMPLE_DIV)-1:0] s_cnt;
     wire sample_tick = (s_cnt == 0);
@@ -24,7 +23,6 @@ module tt_um_sensor_hub_top(
         else s_cnt <= (s_cnt==0) ? (SAMPLE_DIV-1) : (s_cnt-1'b1);
     end
 
-    // Fake ADC
     wire [7:0] adc_data;
     adc8_fake u_adc(
         .clk(clk), .rst_n(rst_n),
@@ -32,7 +30,6 @@ module tt_um_sensor_hub_top(
         .data(adc_data)
     );
 
-    // Phát UART mỗi sample khi TX rảnh
     wire uart_busy;
     reg  req_tx;
     always @(posedge clk or negedge rst_n) begin

@@ -2,7 +2,7 @@
 module adc8_fake(
     input  wire       clk,
     input  wire       rst_n,
-    input  wire       sample,   // 1 chu kỳ để "lấy mẫu"
+    input  wire       sample,
     output reg  [7:0] data
 );
     always @(posedge clk or negedge rst_n) begin
