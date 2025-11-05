@@ -48,7 +48,13 @@ module tt_um_sensor_hub_top(
         .tx(uart_tx), .busy(uart_busy)
     );
 
+    // Drive outputs
     assign uo_out[0]   = uart_tx;
     assign uo_out[7:1] = 7'b0;
+
+    // Gom các tín hiệu chưa dùng để tránh cảnh báo UNUSED (sẽ bị tối ưu bỏ khi tổng hợp)
+    wire _unused_ok = &{1'b0, ui_in, uio_in, uart_busy};
+
 endmodule
 `default_nettype wire
+
