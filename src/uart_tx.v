@@ -1,44 +1,47 @@
 `default_nettype none
 module uart_tx #(
--    parameter integer DIV = 434  // 50 MHz / 115200 ≈ 434
-+    // 16-bit để khớp với bộ đếm cnt và tránh WIDTHTRUNC
-+    parameter [15:0] DIV = 16'd434  // 50 MHz / 115200 ≈ 434
+    // 50 MHz / 115200 ≈ 434
+    parameter [15:0] DIV = 16'd434
 )(
     input  wire       clk,
     input  wire       rst_n,
-    input  wire       start,     // pulse 1 cycle to transmit
+    input  wire       start,       // 1 xung để bắt đầu gửi
     input  wire [7:0] data,
-    output reg        tx,        // idle = 1
+    output reg        tx,          // idle = 1
     output reg        busy
 );
     reg [15:0] cnt;
-    reg [3:0]  bitpos;
-    reg [9:0]  sh;    // {stop(1), data[7:0], start(0)}
-    initial tx = 1'b1;
+    reg [3:0]  bitpos;             // 0..9
+    reg [9:0]  shifter;            // {stop(1), data[7:0], start(0)}
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            tx <= 1'b1; busy <= 1'b0; cnt <= 16'd0; bitpos <= 4'd0; sh <= 10'h3FF;
+            cnt     <= 16'd0;
+            bitpos  <= 4'd0;
+            shifter <= 10'h3FF;
+            tx      <= 1'b1;
+            busy    <= 1'b0;
         end else begin
             if (!busy) begin
+                cnt <= 16'd0;
                 if (start) begin
-                    sh <= {1'b1, data, 1'b0};  // LSB first
--                    busy <= 1'b1; bitpos <= 4'd0; cnt <= DIV - 16'd1;
-+                    busy <= 1'b1; bitpos <= 4'd0; cnt <= DIV - 16'd1;
+                    shifter <= {1'b1, data, 1'b0};
+                    bitpos  <= 4'd0;
+                    busy    <= 1'b1;
                 end
             end else begin
-                if (cnt == 0) begin
-                    tx <= sh[0];
-                    sh <= {1'b1, sh[9:1]};
--                    cnt <= DIV - 1;
-+                    cnt <= DIV - 16'd1;
-                    bitpos <= bitpos + 1'b1;
+                if (cnt == DIV - 16'd1) begin
+                    cnt     <= 16'd0;
+                    tx      <= shifter[0];
+                    shifter <= {1'b1, shifter[9:1]};
                     if (bitpos == 4'd9) begin
                         busy <= 1'b0;
-                        tx   <= 1'b1; // idle
+                        tx   <= 1'b1;       // trở về idle
+                    end else begin
+                        bitpos <= bitpos + 4'd1;
                     end
                 end else begin
-                    cnt <= cnt - 1'b1;
+                    cnt <= cnt + 16'd1;
                 end
             end
         end
